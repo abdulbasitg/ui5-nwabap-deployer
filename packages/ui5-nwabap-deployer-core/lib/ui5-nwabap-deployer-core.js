@@ -3,7 +3,6 @@
 const FileStore = require("./FileStore");
 const TransportManager = require("./TransportManager");
 const isBinaryFile = require("isbinaryfile").isBinaryFileSync;
-
 /**
  * Checks on Options
  * @param {Object} oOptions Options

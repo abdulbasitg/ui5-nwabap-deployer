@@ -1,0 +1,35 @@
+{
+  "name": "ui5-nwabap-deployer-cli",
+  "version": "1.0.0",
+  "description": "UI5 Deployer Command Line Interface",
+  "main": "lib/ui5deployer.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "author": {
+    "name": "Abdulbasıt Gülşen",
+    "email": "abdulbasit@gulsen.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "--update--"
+  },
+  "bugs": {
+    "url": "https://github.com/pfefferf/ui5-nwabap-deployer/issues"
+  },
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "https://github.com/pfefferf/ui5-nwabap-deployer/blob/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "ui5deployer": "node lib/ui5deployer.js"
+  },
+  "dependencies": {
+    "ui5-nwabap-deployer-core": "file:../ui5-nwabap-deployer-core",
+    "@ui5/fs": "^1.0.2",
+    "dotenv": "^8.2.0"
+  }
+}
