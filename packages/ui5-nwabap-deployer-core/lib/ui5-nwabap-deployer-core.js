@@ -49,6 +49,7 @@ function checkOptions(oOptions, oLogger) {
  * @param {array} aFiles
  */
 function syncFiles(oFileStoreOptions, oLogger, aFiles) {
+
     return new Promise((resolve, reject) => {
         const oFileStore = new FileStore(oFileStoreOptions, oLogger);
 
@@ -87,7 +88,7 @@ async function uploadWithTransportUserMatch(oTransportManager, oFileStoreOptions
                     return;
                 }
             } else if (oFileStoreOptions.ui5.create_transport === true) {
-                oTransportManager.createTransport(oFileStoreOptions.ui5.package, oFileStoreOptions.ui5.transport_text, async function(oError, sTransportNo) {
+                oTransportManager.createTransport(oFileStoreOptions.ui5.package, oFileStoreOptions.ui5.transport_text, oFileStoreOptions.auth.user, oFileStoreOptions.ui5.bspcontainer, async function(oError, sTransportNo) {
                     if (oError) {
                         reject(oError);
                         return;
@@ -183,7 +184,7 @@ exports.deployUI5toNWABAP = async function(oOptions, aFiles, oLogger) {
                     return;
                 }
             } else if (oAdaptedOptions.ui5.create_transport === true) {
-                oTransportManager.createTransport(oFileStoreOptions.ui5.package, oAdaptedOptions.ui5.transport_text, async function(oError, sTransportNo) {
+                oTransportManager.createTransport(oFileStoreOptions.ui5.package, oAdaptedOptions.ui5.transport_text, oFileStoreOptions.auth.user, oFileStoreOptions.ui5.bspcontainer, async function(oError, sTransportNo) {
                     if (oError) {
                         reject(oError);
                         return;

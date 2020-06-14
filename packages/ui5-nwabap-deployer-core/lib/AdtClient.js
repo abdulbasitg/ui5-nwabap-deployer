@@ -81,7 +81,9 @@ AdtClient.prototype.determineCSRFToken = function(fnCallback) {
         }
     }.bind(this));
 };
-
+AdtClient.prototype.buildTransportQueryUrl = function(sTransportQueryUrl, sUsername) {
+    return this._oOptions.conn.server + sTransportQueryUrl + "?targets=true&user=" + sUsername;
+};
 AdtClient.prototype.buildUrl = function(sUrl) {
     return this._oOptions.conn.server + sUrl;
 };

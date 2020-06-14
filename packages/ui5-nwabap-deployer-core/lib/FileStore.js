@@ -178,13 +178,13 @@ FileStore.prototype.calcAppIndex = function(fnCallback) {
  * @param {function} fnCallback callback function
  */
 FileStore.prototype.syncFiles = function(aFiles, fnCallback) {
-    const aArtifactsLocal = util.structureResolve(aFiles, "/");
+    const aArtifactsLocal = util.structureResolve(aFiles, "/");    
     let aArtifactsServer = [];
     let aArtifactsSync = [];
     let aArtifactsSyncWork = [];
 
     const me = this;
-
+    me._oLogger.log("Start uploading with transport number:" + me._oOptions.ui5.transportno);
     async.series([
         // L1, step 1: determine artifacts which have to be uploaded
         function(fnCallbackAsyncL1) {
