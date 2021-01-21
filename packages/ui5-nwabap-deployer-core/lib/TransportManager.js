@@ -46,48 +46,54 @@ TransportManager.prototype.createTransport = function(sPackageName, sRequestText
                 fnCallback(new Error(fsutil.createResponseError(oError)));
                 return;
             } else if (oResponse.statusCode !== fsutil.HTTPSTAT.ok) {
-                fnCallback(new Error(`Operation Query Transport: Expected status code ${fsutil.HTTPSTAT.ok}, actual status code ${oResponse.statusCode}`));
+                fnCallback(new Error(`Operation Query Transport at ${oRequestOptions.url}: Expected status code ${fsutil.HTTPSTAT.ok}, actual status code ${oResponse.statusCode}`));
                 return;
             } else {
                 if (!oResponse.body) {
                     return fnCallback(new Error(`Operation Query Transport: Response Body doesn't exist!`));
                 }
-                const oParsed = new XMLDocument(oResponse.body);
-                const oWorkbench = oParsed.childNamed("tm:workbench");                
-                const oTargets = oWorkbench.childrenNamed("tm:target");
-                oTargets.some(target => {
-                    const oModifiable = target.childNamed("tm:modifiable");
-                    const oRequests = oModifiable.childrenNamed("tm:request");
-                    oRequests.some(request => {                        
-                        var sRequestNumber = request.attr["tm:number"];
-                        request.eachChild((child,index,array) => {
-                            if (child.name==="tm:abap_object") {
-                                if (
-                                        (child.attr["tm:pgmid"] === REQ_PGMID_WAPP && child.attr["tm:type"] === REQ_TYPE_WAPP && child.attr["tm:name"].toUpperCase().startsWith(sBSPContainer.toUpperCase())) ||
-                                        (child.attr["tm:pgmid"] === REQ_PGMID_WAPA && child.attr["tm:type"] === REQ_TYPE_WAPA && child.attr["tm:name"].toUpperCase() === sBSPContainer.toUpperCase()) 
-                                    ) {
-                                    sTransportNo = sRequestNumber;                                    
-                                }        
-                            } else if (child.name==="tm:task") {
-                                child.eachChild((taskChild,taskIndex,taskArray) => {                                    
-                                    if (taskChild.name==="tm:abap_object") {
-                                        if (
-                                                (taskChild.attr["tm:pgmid"] === REQ_PGMID_WAPP && taskChild.attr["tm:type"] === REQ_TYPE_WAPP && taskChild.attr["tm:name"].toUpperCase().startsWith(sBSPContainer.toUpperCase())) ||
-                                                (taskChild.attr["tm:pgmid"] === REQ_PGMID_WAPA && taskChild.attr["tm:type"] === REQ_TYPE_WAPA && taskChild.attr["tm:name"].toUpperCase() === sBSPContainer.toUpperCase()) 
-                                            ) {
-                                            sTransportNo = sRequestNumber;
-                                        }        
-                                    }
-                                });
-                            }                                                        
+                let oParsed = "";
+                try {
+                    oParsed = new XMLDocument(oResponse.body);
+                } catch(err) {
+                    return fnCallback(new Error(`Cannot parse XML response:${oResponse.body}`));
+                }                
+                const oWorkbench = oParsed.childNamed("tm:workbench");   
+                if (oWorkbench) {             
+                    const oTargets = oWorkbench.childrenNamed("tm:target");
+                    oTargets.some(target => {
+                        const oModifiable = target.childNamed("tm:modifiable");
+                        const oRequests = oModifiable.childrenNamed("tm:request");
+                        oRequests.some(request => {                        
+                            var sRequestNumber = request.attr["tm:number"];
+                            request.eachChild((child,index,array) => {
+                                if (child.name==="tm:abap_object") {
+                                    if (
+                                            (child.attr["tm:pgmid"] === REQ_PGMID_WAPP && child.attr["tm:type"] === REQ_TYPE_WAPP && child.attr["tm:name"].toUpperCase().startsWith(sBSPContainer.toUpperCase()+" ")) ||
+                                            (child.attr["tm:pgmid"] === REQ_PGMID_WAPA && child.attr["tm:type"] === REQ_TYPE_WAPA && child.attr["tm:name"].toUpperCase() === sBSPContainer.toUpperCase()) 
+                                        ) {
+                                        sTransportNo = sRequestNumber;                                    
+                                    }        
+                                } else if (child.name==="tm:task") {
+                                    child.eachChild((taskChild,taskIndex,taskArray) => {                                    
+                                        if (taskChild.name==="tm:abap_object") {
+                                            if (
+                                                    (taskChild.attr["tm:pgmid"] === REQ_PGMID_WAPP && taskChild.attr["tm:type"] === REQ_TYPE_WAPP && taskChild.attr["tm:name"].toUpperCase().startsWith(sBSPContainer.toUpperCase())+" ") ||
+                                                    (taskChild.attr["tm:pgmid"] === REQ_PGMID_WAPA && taskChild.attr["tm:type"] === REQ_TYPE_WAPA && taskChild.attr["tm:name"].toUpperCase() === sBSPContainer.toUpperCase()) 
+                                                ) {
+                                                sTransportNo = sRequestNumber;
+                                            }        
+                                        }
+                                    });
+                                }                                                        
+                            });
+                            if (sTransportNo !== "") {
+                                this._oLogger.log("Found object in transport:"+sRequestNumber);
+                                return true;
+                            }
                         });
-                        if (sTransportNo !== "") {
-                            this._oLogger.log("Found object in transport:"+sRequestNumber);
-                            return true;
-                        }
                     });
-                });
-                
+                }
                 if (sTransportNo !== "") {                    
                     fnCallback(null, sTransportNo);  
                 } else {
